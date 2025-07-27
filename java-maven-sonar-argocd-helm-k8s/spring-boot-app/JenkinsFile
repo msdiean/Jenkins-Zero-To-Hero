@@ -1,13 +1,13 @@
 pipeline {
   agent {
     docker {
-      image 'msdiean/spring-app-java17'
+      image 'abhishekf5/maven-abhishek-docker-agent:v1'
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
 
   environment {
-    DOCKER_IMAGE = "msdiean/spring-app-java17"
+    IMAGE_NAME = "msdiean/spring-app-java17"
     SONAR_URL = "http://54.234.68.101:9000"
     GIT_REPO_NAME = "Jenkins-Zero-To-Hero"
     GIT_USER_NAME = "msdiean"
@@ -16,14 +16,12 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        echo 'Checkout stage passed'
-        // git branch: 'main', url: 'https://github.com/msdiean/Jenkins-Zero-To-Hero.git'
+        git branch: 'main', url: 'https://github.com/msdiean/Jenkins-Zero-To-Hero.git'
       }
     }
 
     stage('Build and Test') {
       steps {
-        sh 'ls -ltr'
         sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
       }
     }
@@ -31,7 +29,10 @@ pipeline {
     stage('Static Code Analysis') {
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
+          sh '''
+            cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
+            mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL
+          '''
         }
       }
     }
@@ -44,7 +45,7 @@ pipeline {
             git config user.name "msdiean"
             sed -i "s|image:.*|image: msdiean/spring-app-java17|g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
             git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-            git commit -m "Update deployment to use image msdiean/spring-app-java17"
+            git commit -m "Use msdiean/spring-app-java17 image in deployment"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
           '''
         }
