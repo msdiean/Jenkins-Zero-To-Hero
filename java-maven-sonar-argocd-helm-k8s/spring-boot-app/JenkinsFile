@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      image 'abhishekf5/maven-abhishek-docker-agent:v1'
+      image 'msdiean/spring-app-java17'  // ✅ Your custom image with Java 17
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
     }
   }
@@ -45,7 +45,7 @@ pipeline {
             git config user.name "msdiean"
             sed -i "s|image:.*|image: msdiean/spring-app-java17|g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
             git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-            git commit -m "Use msdiean/spring-app-java17 image in deployment"
+            git commit -m "Update deployment to use msdiean/spring-app-java17"
             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
           '''
         }
