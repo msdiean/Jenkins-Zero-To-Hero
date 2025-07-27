@@ -12,15 +12,17 @@ RUN mvn dependency:go-offline
 # Now copy the rest of the project
 COPY src ./src
 
-# Package the application
+# Package the application (skip tests to speed up build)
 RUN mvn clean package -DskipTests
+
 
 # ======== Stage 2: Run the app with a lightweight JRE =========
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /opt/app
 
-# Copy the jar file from the build stage
+# Copy the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
+# Run the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]
