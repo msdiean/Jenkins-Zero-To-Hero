@@ -1,13 +1,14 @@
-# You can change this base image to anything else
-# But make sure to use the correct version of Java
-FROM adoptopenjdk/openjdk11:alpine-jre
+# Use Java 17 (Temurin is the official successor of AdoptOpenJDK)
+FROM eclipse-temurin:17-jre-alpine
 
-# Simply the artifact path
+# Define the artifact path (JAR file)
 ARG artifact=target/spring-boot-web.jar
 
+# Set working directory inside the container
 WORKDIR /opt/app
 
+# Copy the JAR file to the container
 COPY ${artifact} app.jar
 
-# This should not be changed
-ENTRYPOINT ["java","-jar","app.jar"]
+# Set the startup command
+ENTRYPOINT ["java", "-jar", "app.jar"]
